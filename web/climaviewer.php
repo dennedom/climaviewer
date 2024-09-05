@@ -1,1 +1,260 @@
-/var/www/html/climaviewer.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ClimaViewer Dashboard</title>
+    <link rel="icon" href="favicon.webp" type="image/webp">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+		
+        .temperature-cell, .humidity-cell {
+            font-size: 2em;
+            font-weight: bold;			
+        }
+
+        td {
+            vertical-align: middle;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: large;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        .trend-up {
+            color: red;
+        }
+
+        .trend-down {
+            color: darkblue;
+        }
+
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>ClimaViewer Dashboard</h1>
+    
+    <div id="lastUpdate"></div>
+    <br>
+    <table id="sensorTable">
+        <thead>
+            <tr>
+                <th>Location</th>
+                <th>Temperature (°C)</th>
+                <th>Humidity (%)</th>
+                <th>Trend</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
+    <canvas id="temperatureChart"></canvas>
+    <canvas id="humidityChart"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script>
+        function destroyChart(chart) {
+            if (chart && typeof chart.destroy === 'function') {
+                chart.destroy();
+            }
+        }
+
+        fetch('get_data.php')
+            .then(response => response.json())
+            .then(data => {
+                if (!Array.isArray(data)) {
+                    console.error('Data is not an array:', data);
+                    return;
+                }
+
+                data.sort((a, b) => a.id - b.id);
+                const now = new Date();
+                const past24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                data = data.filter(entry => new Date(entry.timestamp) >= past24Hours);
+
+                const latestReadings = {};
+                data.forEach(entry => {
+                    if (!latestReadings[entry.name] || entry.id > latestReadings[entry.name].id) {
+                        latestReadings[entry.name] = entry;
+                    }
+                });
+
+                const lastUpdate = data[data.length-1].timestamp;
+                document.getElementById('lastUpdate').innerText = `Last Update: ${lastUpdate}`;
+
+                const tableBody = document.getElementById('sensorTable').getElementsByTagName('tbody')[0];
+                tableBody.innerHTML = '';
+                for (const location in latestReadings) {
+                    const reading = latestReadings[location];
+                    const lastReading = data.reverse().find(entry => entry.name === location && entry.temperature !== reading.temperature);
+                    const tempTrend = lastReading && reading.temperature > lastReading.temperature ? 'up' : 'down';
+                    const humTrend = lastReading && reading.humidity > lastReading.humidity ? 'up' : 'down';
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${reading.name}</td>
+                            <td class="temperature-cell">${reading.temperature}°C</td>
+                            <td class="humidity-cell">${reading.humidity}%</td>
+                            <td>
+                                <span class="trend-${tempTrend}">Temperature: ${tempTrend === 'up' ? '▲' : '▼'}</span>
+                                <br>
+                                <span class="trend-${humTrend}">Humidity: ${humTrend === 'up' ? '▲' : '▼'}</span>
+                            </td>
+                        </tr>
+                    `;
+                }
+
+                var tzoffset = (new Date()).getTimezoneOffset()*60000;
+                const labels = [...new Set(data.map(entry => {
+                    let date = new Date(entry.timestamp);
+                    date.setSeconds(0, 0);
+                    let localISOTime = (new Date(date - tzoffset)).toISOString().slice(0, 16);
+                    return localISOTime;
+                }))];
+                const locations = [...new Set(data.map(entry => entry.name))];
+
+                if (!data || !data.length || !data[0].timestamp) {
+                    console.error("Unexpected data format:", data);
+                    return;
+                }
+
+                const temperatureDatasets = locations.map(location => {
+                    const locationData = data.filter(entry => entry.name === location);
+                    return {
+                        label: `${location}`,
+                        data: locationData.map(entry => entry.temperature),
+                        borderColor: generateColor(location),
+                        fill: false,
+                        pointRadius: 1,
+                        borderWidth: 2,
+                        tension: 0.1
+                    };
+                });
+
+                const humidityDatasets = locations.map(location => {
+                    const locationData = data.filter(entry => entry.name === location);
+                    return {
+                        label: `${location}`,
+                        data: locationData.map(entry => entry.humidity),
+                        borderColor: generateColor(location),
+                        fill: false,
+                        pointRadius: 1,
+                        borderWidth: 2,
+                        tension: 0.1
+                    };
+                });
+
+                destroyChart(window.temperatureChart);
+                destroyChart(window.humidityChart);
+
+                const tempValues = data.map(entry => entry.temperature);
+                const minTemp = Math.min(...tempValues) - 2;
+                const maxTemp = Math.max(...tempValues) + 2;
+
+                const humidityValues = data.map(entry => entry.humidity);
+                const minHumidity = Math.min(...humidityValues) - 2;
+                const maxHumidity = Math.max(...humidityValues) + 2;
+
+                window.temperatureChart = new Chart(document.getElementById('temperatureChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: temperatureDatasets
+                    },
+                    options: {						
+                        responsive: true,
+                        plugins: { legend: { position: 'right' } },
+                        scales: {
+                            x: {
+                                type: 'timeseries',
+                                time: {
+                                    unit: 'hour',
+                                    displayFormats: { hour: 'HH:mm' },
+                                    tooltipFormat: 'dd/MM/yyyy HH:mm'
+                                },
+                                min: labels[0],
+                                max: labels[labels.length-1],
+                                title: {
+                                    display: true,
+                                    text: 'Timestamp'
+                                }
+                            },
+                            y: {
+                                min: minTemp,
+                                max: maxTemp,
+                                ticks: { stepSize: 0.2 },
+                                title: { display: true, text: 'Temperature (°C)' }
+                            }
+                        }
+                    }
+                });
+
+                window.humidityChart = new Chart(document.getElementById('humidityChart'), {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: humidityDatasets
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'right' } },
+                        scales: {
+                            x: {
+                                type: 'timeseries',
+                                time: {
+                                    unit: 'hour',
+                                    displayFormats: { hour: 'HH:mm' },
+                                    tooltipFormat: 'dd/MM/yyyy HH:mm'
+                                },
+                                min: labels[0],
+                                max: labels[labels.length-1],
+                                title: {
+                                    display: true,
+                                    text: 'Timestamp'
+                                }
+                            },
+                            y: {
+                                min: minHumidity,
+                                max: maxHumidity,
+                                ticks: { stepSize: 0.2 },
+                                title: { display: true, text: 'Humidity (%)' }
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching data:', error));
+
+        function generateColor(location, alpha = 1) {
+            const colors = {
+                "Wohnzimmer": `rgba(255, 99, 132, ${alpha})`,
+                "Schlafzimmer": `rgba(54, 162, 235, ${alpha})`,
+                "Keller": `rgba(75, 192, 192, ${alpha})`,
+                "Dachboden": `rgba(153, 102, 255, ${alpha})`,
+                "Garten": `rgba(255, 159, 64, ${alpha})`
+            };
+            return colors[location] || `rgba(0, 0, 0, ${alpha})`;
+        }
+    </script>
+</body>
+</html>
