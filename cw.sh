@@ -48,19 +48,19 @@ while getopts "vhcjxw" opt; do
         h) showHelp ;;
         c) eval nextopt=${!OPTIND}
            if [[ -n $nextopt && $nextopt != -* ]] ; then
-		       CSV_FILE="$OPTARG"
+		       CSV_FILE="$nextopt"
            else
                CSV_FILE="."
            fi ;;
         j) eval nextopt=${!OPTIND}
            if [[ -n $nextopt && $nextopt != -* ]] ; then
-		       JSON_FILE="$OPTARG"
+		       JSON_FILE="$nextopt"
            else
                JSON_FILE="."
            fi ;;
         x) eval nextopt=${!OPTIND}
            if [[ -n $nextopt && $nextopt != -* ]] ; then
-		       XML_FILE="$OPTARG"
+		       XML_FILE="$nextopt"
            else
                XML_FILE="."
            fi ;;		
@@ -168,7 +168,7 @@ for (( counter=0; counter<CHANNELS; counter++ )); do
     debug "Channel $((counter+1)) - $CHANNEL_NAME"
     debug "Temperature: ${TEMP}°C"
     debug "Humidity: ${HUM}%"
-    debug "-------------\n"
+    debug "-------------"
     
     # Check if Temperature is out of range
     if awk "BEGIN {exit !($TEMP >= 100 || $TEMP <= -100)}"; then
