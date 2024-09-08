@@ -20,14 +20,14 @@ ClimaViewer is a Linux-based tool designed to visualize and export temperature a
 Attach the USB cable to your device (e.g., Raspberry Pi or computer).
 
 ## Web View Setup
-Create a cron job to fetch data every 5 minutes (__sudo crontab -e__):
+Create a cron job to fetch data every 5 minutes (`sudo crontab -e`):
 
 ```
 */5 * * * * /home/pi/ClimaViewer/cw.sh -j | /home/pi/ClimaViewer/db.sh >> /home/pi/ClimaViewer/logs/$(date '+\%Y-\%m')_ClimaViewer.log 2>&1
 ```
 Update the paths according to your environment.
 
-Copy the files from the web subfolder to a directory accessible by your web server (e.g., lighttpd). Example path: /var/www/html/.
+Copy the files from the web subfolder to a directory accessible by your web server (e.g., lighttpd). Example path: `/var/www/html/`.
 ![grafik](https://github.com/user-attachments/assets/a090c133-d87d-499c-afda-903b78d1f84a)
 
 ## Usage
