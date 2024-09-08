@@ -3,30 +3,31 @@
 ClimaViewer is a Linux-based tool designed to visualize and export temperature and humidity data from the DNT Raumklimastation RoomLogg PRO. It allows users to display real-time climate data and trends via a user-friendly web interface or in the console.
 
 ## Features
-* Temperature and humidity monitoring via web browser and console
-* Data export functionality for further analysis
-* Graphical representation of trends over time
-* runs out-of-the box with basic shell commands – no need to install additional environments like python or nodejs
-* basic Web-View (no extra webserver required) and extended Web-View (webserver required)
+* Real-time monitoring of temperature and humidity via both web browser and console
+* Data export for further analysis
+* Visualized trends over time with graphs
+* Runs out-of-the-box with basic shell commands – no need for additional environments like Python or Node.js
+* Basic web view (without a web server) and extended web view (requires web server)
 
 ## Requirements
-* Linux (e.g., Raspbian on Raspberry Pi)
+* Linux-based system (e.g., Raspbian on a Raspberry Pi)
 
 ## Configuration
-1) Modify the amount and the names of your channels in cw.sh (line 6-14)
-2) Modify the names of your channels in web/climaviewer.php (line 250-254)
-3) Modify the path to the SQLite DB in db.sh (line 4) and web/get_data.php (line 9)
+1) Adjust the number and the names of channels in cw.sh (line 6-14)
+2) Update the names of your channels in web/climaviewer.php (line 250-254)
+3) Update the path to the SQLite DB in db.sh (line 4) and web/get_data.php (line 9)
 
-Attach USB-Cable to your device (computer, Raspberry Pi, ...)
+Attach the USB cable to your device (e.g., Raspberry Pi or computer).
 
-## Web View
-Create a crontab entry (__sudo crontab -e__):
+## Web View Setup
+Create a cron job to fetch data every 5 minutes (__sudo crontab -e__):
+
 ```
 */5 * * * * /home/pi/ClimaViewer/cw.sh -j | /home/pi/ClimaViewer/db.sh >> /home/pi/ClimaViewer/logs/$(date '+\%Y-\%m')_ClimaViewer.log 2>&1
 ```
-This entry fetches data every 5 minutes. Paths have to be adapted to your environment.
+Update the paths according to your environment.
 
-Files from web-Subfolder have to be placed in a folder accessible by an already installed webserver (e.g., lighttpd). Example: /var/www/html/
+Copy the files from the web subfolder to a directory accessible by your web server (e.g., lighttpd). Example path: /var/www/html/.
 ![grafik](https://github.com/user-attachments/assets/a090c133-d87d-499c-afda-903b78d1f84a)
 
 ## Usage
@@ -45,6 +46,7 @@ Options:
   -x        Write XML output to the specified file.
   -w        Start a webserver. Optionally specify the port (default: 8010).
 ```
+### Example console output
 ```
 sudo ./cw.sh
 Channel Location        Temperature [°C]        Humidity [%]
@@ -55,7 +57,7 @@ Channel Location        Temperature [°C]        Humidity [%]
 5       Garten          27.7                    49
 ```
 
-### CSV Output
+### Example CSV Output
 ```
 sudo ./cw.sh -c
 1;Wohnzimmer;24.9;61
@@ -65,7 +67,7 @@ sudo ./cw.sh -c
 5;Garten;27.7;49
 ```
 
-### JSON Output
+### Example JSON Output
 ```
 sudo ./cw.sh -j
 [
@@ -102,7 +104,7 @@ sudo ./cw.sh -j
 ]
 ```
 
-### XML Output
+### Example XML Output
 ```
 sudo ./cw.sh -x
 <?xml version="1.0" encoding="UTF-8"?>
@@ -117,3 +119,5 @@ Starting web server on port 8010...
 Output in Browser:
 ![grafik](https://github.com/user-attachments/assets/94c69249-af74-47de-9cc0-3b5b945a613b)
 
+## Acknowledgment
+Special thanks to [Jürgen](https://github.com/juergen-rocks/raumklima) for the foundational work that inspired this project.
