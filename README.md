@@ -13,9 +13,9 @@ ClimaViewer is a Linux-based tool designed to visualize and export temperature a
 * Linux-based system (e.g., Raspbian on a Raspberry Pi)
 
 ## Configuration
-1) Adjust the number and the names of channels in cw.sh (line 6-14)
-2) Update the names of your channels in web/climaviewer.php (line 250-254)
-3) Update the path to the SQLite DB in db.sh (line 4) and web/get_data.php (line 9)
+1) Adjust the number and the names of channels in `cw.sh` (line 6-14)
+2) Update the names of your channels in `web/climaviewer.php` (line 250-254)
+3) Update the path to the SQLite DB in `db.sh` (line 4) and `web/get_data.php` (line 9)
 
 Attach the USB cable to your device (e.g., Raspberry Pi or computer).
 
@@ -108,7 +108,33 @@ sudo ./cw.sh -j
 ```
 sudo ./cw.sh -x
 <?xml version="1.0" encoding="UTF-8"?>
-<Channels><Channel number="1"><Name>Wohnzimmer</Name><Temperature>24.9</Temperature><Humidity>61</Humidity></Channel><Channel number="2"><Name>Keller</Name><Temperature>22.5</Temperature><Humidity>64</Humidity></Channel><Channel number="3"><Name>Schlafzimmer</Name><Temperature>26</Temperature><Humidity>56</Humidity></Channel><Channel number="4"><Name>Dachboden</Name><Temperature>27</Temperature><Humidity>44</Humidity></Channel><Channel number="5"><Name>Garten</Name><Temperature>27.7</Temperature><Humidity>50</Humidity></Channel></Channels>
+<Channels>
+	<Channel number="1">
+		<Name>Wohnzimmer</Name>
+		<Temperature>24.9</Temperature>
+		<Humidity>61</Humidity>
+	</Channel>
+	<Channel number="2">
+		<Name>Keller</Name>
+		<Temperature>22.5</Temperature>
+		<Humidity>64</Humidity>
+	</Channel>
+	<Channel number="3">
+		<Name>Schlafzimmer</Name>
+		<Temperature>26</Temperature>
+		<Humidity>56</Humidity>
+	</Channel>
+	<Channel number="4">
+		<Name>Dachboden</Name>
+		<Temperature>27</Temperature>
+		<Humidity>44</Humidity>
+	</Channel>
+	<Channel number="5">
+		<Name>Garten</Name>
+		<Temperature>27.7</Temperature>
+		<Humidity>50</Humidity>
+	</Channel>
+</Channels>
 ```
   
 ## Build-in Mini Webserver
