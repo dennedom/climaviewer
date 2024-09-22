@@ -137,7 +137,7 @@ sudo ./cw.sh -x
 </Channels>
 ```
   
-## Build-in Mini Webserver
+## Built-in Mini Webserver
 ```
 sudo ./cw.sh -w
 Starting web server on port 8010...
