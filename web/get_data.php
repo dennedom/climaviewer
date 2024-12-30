@@ -12,7 +12,7 @@ try {
     $db->exec('BEGIN TRANSACTION;');
 
     // Delete records older than 72 hours
-    $db->exec('DELETE FROM sensor_readings WHERE timestamp < datetime('now', '-72 hours');');
+    $db->exec('DELETE FROM sensor_readings WHERE timestamp < datetime(\'now\', \'-72 hours\');');
 
     // Query to select all data ordered by timestamp in ascending order
     // $result = $db->query('SELECT * FROM sensor_readings ORDER BY timestamp ASC');
@@ -37,7 +37,7 @@ try {
 } catch (Exception $e) {
     // Rollback the transaction if an error occurs
     if ($db) {
-        $db->exec('ROLLBACK');
+        $db->exec('ROLLBACK;');
     }
     // Output a JSON error message in case of an exception
     echo json_encode(['error' => $e->getMessage()]);
