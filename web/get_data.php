@@ -9,17 +9,17 @@ try {
     $db = new SQLite3('/home/pi/ClimaViewer/sensor_data.db');
 
     // Begin a transaction to perform all operations as a single atomic unit
-    $db->exec('BEGIN TRANSACTION');
+    $db->exec('BEGIN TRANSACTION;');
 
     // Delete records older than 72 hours
-    $db->exec("DELETE FROM sensor_readings WHERE timestamp < datetime('now', '-72 hours')");
+    $db->exec('DELETE FROM sensor_readings WHERE timestamp < datetime('now', '-72 hours');');
 
     // Query to select all data ordered by timestamp in ascending order
     // $result = $db->query('SELECT * FROM sensor_readings ORDER BY timestamp ASC');
     $result = $db->query('SELECT id, channel, name, temperature, humidity, timestamp FROM sensor_readings WHERE id IN (SELECT MIN(id) FROM sensor_readings GROUP BY name, strftime(\'%Y-%m-%d %H:%M\', timestamp)) ORDER BY timestamp ASC;');      
 
     // Commit the transaction after all operations
-    $db->exec('COMMIT');
+    $db->exec('COMMIT;');
 
     // Fetch data
     $data = [];
