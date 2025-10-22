@@ -11,6 +11,7 @@ ClimaViewer is a Linux-based tool designed to visualize and export temperature a
 
 ## Requirements
 * Linux-based system (e.g., Raspbian on a Raspberry Pi)
+* sudo apt install xxd
 
 ## Configuration
 1) Adjust the number and the names of channels in `cw.sh` (line 6-14)
