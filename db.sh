@@ -34,7 +34,9 @@ $(echo "$json_input" | jq -c '.[]' | while read -r record; do
     local name=$(echo "$record" | jq -r '.Name')
     local temperature=$(echo "$record" | jq -r '.Temperature')
     local humidity=$(echo "$record" | jq -r '.Humidity')
-
+	
+	[ "$temperature" = "n/a" ] && temperature="NULL"
+    [ "$humidity" = "n/a" ] && humidity="NULL"
 								 
     echo "INSERT INTO \"$TABLE_NAME\" (channel, name, temperature, humidity) VALUES ($channel, '$name', $temperature, $humidity);"
 done)
