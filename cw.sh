@@ -121,29 +121,20 @@ fi
 trap 'rm -f report.bin; exec 3>&-' EXIT
 
 # Open device for r/w in non-blocking mode
-					
 exec 3<> "$DEVICE" || { echo "Error: Failed to open device $DEVICE"; exit 1; }
 sudo cat report.bin >&3
-															   
-					  
-							 
- 
 
 # Read answer from device (non-blocking)
 # Read max. 64 Bytes, - default size of HID Reports
-RESPONSE=$(head -c 64 <&3 | hexdump -e '64/1 "%02X " "\n"')
-				 
+RESPONSE=$(timeout 5 head -c 64 <&3 | hexdump -e '64/1 "%02X " "\n"')
 
 DATA=(${RESPONSE})
 exec 3>&-  # Close Device
-								
-										
 
 # Show response
 debug "Response from device:"
 debug "$RESPONSE"
 								  
-		  
 
 CSVHELPER=""
 JSONARRAY=()
